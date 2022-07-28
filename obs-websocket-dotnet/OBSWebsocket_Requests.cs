@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet.Types;
 using System;
@@ -1582,16 +1582,12 @@ namespace OBSWebsocketDotNet
         /// <param name="sourceName">Source name</param>
         /// <param name="sourceType">Type of the specified source. Useful for type-checking to avoid settings a set of settings incompatible with the actual source's type.</param>
         /// <returns>settings</returns>
-        public SourceSettings GetSourceSettings(string sourceName, string sourceType = null)
+        public SourceSettings GetSourceSettings(string sourceName)
         {
             var request = new JObject
             {
                 { "inputName", sourceName }
             };
-            if (sourceType != null)
-            {
-                request.Add("sourceType", sourceType);
-            }
 
             var inputs = SendRequest("GetInputList", request);
 
@@ -1610,15 +1606,11 @@ namespace OBSWebsocketDotNet
         {
             var request = new JObject
             {
-                { "sourceName", sourceName },
-                { "sourceSettings", settings }
+                { "inputName", sourceName },
+                { "inputSettings", settings }
             };
-            if (sourceType != null)
-            {
-                request.Add("sourceType", sourceType);
-            }
 
-            SendRequest("SetSourceSettings", request);
+            SendRequest("SetInputSettings", request);
         }
 
         /// <summary>
