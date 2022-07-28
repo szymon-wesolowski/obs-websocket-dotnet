@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace OBSWebsocketDotNet.Types
 {
@@ -106,5 +107,33 @@ namespace OBSWebsocketDotNet.Types
         /// Default Constructor for deserialization
         /// </summary>
         public SceneItem() { }
+
+
+        internal OBSWebsocket owningWebsocket;
+
+        [JsonIgnore]
+        public string SceneName { get; set; }
+
+
+
+        public bool GetIsEnabled()
+        {
+            return owningWebsocket.GetSceneItemEnabled(SceneName, ID);
+        }
+
+        public void SetIsEnabled(bool enabled)
+        {
+            owningWebsocket.SetSceneItemEnabled(SceneName, ID, enabled);
+        }
+
+
+
+
+
+
+
+
+
+
     }
 }

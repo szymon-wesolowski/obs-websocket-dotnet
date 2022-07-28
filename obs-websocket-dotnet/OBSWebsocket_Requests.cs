@@ -119,40 +119,22 @@ namespace OBSWebsocketDotNet
         /// <returns>An <see cref="OBSScene"/> object describing the current scene</returns>
         public OBSScene GetCurrentScene()
         {
-            JObject response = SendRequest("GetCurrentProgramScene");
-            return new OBSScene(response);
+            return OBSScene.CurrentProgramScene(this);
         }
 
         /// <summary>
         /// Set the current scene to the specified one
         /// </summary>
         /// <param name="sceneName">The desired scene name</param>
-        public void SetCurrentScene(string sceneName)
-        {
-      //var requestFields = new JObject
-      //{
-      //    { "scene-name", sceneName }
-      //};
-
-      //SendRequest("SetCurrentScene", requestFields);
-
-
-      //var inputSettings = new JObject
-      //      {
-      //        { "input", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8" },
-      //        { "is_local_file", false }
-      //      };
-
-      //var itemId = CreateSource("media_source", "ffmpeg_source", "Scene", inputSettings, true);
-
-      //var source = GetSourceSettings("Media Source");
-
-      //SetSceneItemProperties(new SceneItemProperties { Item = "image", Position = new SceneItemPositionInfo { X = 188, Y = 151 }, Visible = true, Width = 229, Height = 162 }, "Scene");
-
-      //var stream = GetStreamSettings();
-
-      SetStreamSettings(new StreamingService{Type = "rtmp_custom", Settings = new StreamingServiceSettings{Server = "rtmp://sw-test-msagwypych-euwe.channel.media.azure.net:1935/live/72f5d1275a6a43bf9fb12310b3d6396d", Key = "empty"}}, true);
-    }
+        //public void SetCurrentScene(string sceneName)
+        //{
+        //    var requestFields = new JObject
+        //    {
+        //        { "scene-name", sceneName }
+        //    };
+        //
+        //    SendRequest("SetCurrentScene", requestFields);
+        //}
 
         /// <summary>
         /// Get the filename formatting string
@@ -331,7 +313,7 @@ namespace OBSWebsocketDotNet
                 requestFields.Add("scene-name", sceneName);
             }
 
-            return SendRequest("GetSceneItemProperties", requestFields);
+            return SendRequest("GetInputPropertiesListPropertyItems", requestFields);
         }
 
         /// <summary>
@@ -558,12 +540,12 @@ namespace OBSWebsocketDotNet
         /// Get the current status of the streaming and recording outputs
         /// </summary>
         /// <returns>An <see cref="OutputStatus"/> object describing the current outputs states</returns>
-        public OutputStatus GetStreamingStatus()
-        {
-            JObject response = SendRequest("GetStreamStatus");
-            var outputStatus = new OutputStatus(response);
-            return outputStatus;
-        }
+        //public OutputStatus GetStreamingStatus()
+        //{
+        //    JObject response = SendRequest("GetStreamingStatus");
+        //    var outputStatus = new OutputStatus(response);
+        //    return outputStatus;
+        //}
 
         /// <summary>
         /// List all transitions
@@ -761,26 +743,131 @@ namespace OBSWebsocketDotNet
         /// </summary>
         /// <param name="props">Object containing changes</param>
         /// <param name="sceneName">Option scene name</param>
-        public void SetSceneItemProperties(SceneItemProperties props, string sceneName = null)
+        //public void SetSceneItemProperties(SceneItemProperties props, string sceneName = null)
+        //{
+        //    JsonSerializerSettings settings = new JsonSerializerSettings
+        //    {
+        //        NullValueHandling = NullValueHandling.Ignore
+        //    };
+        //    var requestFields = JObject.Parse(JsonConvert.SerializeObject(props, settings));
+        //
+        //    if (requestFields["item"] == null)
+        //    {
+        //        requestFields["item"] = props.ItemName;
+        //    }
+        //
+        //    if (sceneName != null)
+        //    {
+        //        requestFields.Add("scene-name", sceneName);
+        //    }
+        //
+        //    SendRequest("SetSceneItemProperties", requestFields);
+        //}
+
+
+        #region Scene Requests
+
+        //#TODO GetSceneList
+        //#TODO GetGroupList
+
+
+        //#TODO doc
+        public string GetCurrentProgramScene()
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore
-            };
-            var requestFields = JObject.Parse(JsonConvert.SerializeObject(props, settings));
-
-            if (requestFields["item"] == null)
-            {
-                requestFields["item"] = props.ItemName;
-            }
-
-            if (sceneName != null)
-            {
-                requestFields.Add("scene-name", sceneName);
-            }
-
-            SendRequest("SetSceneItemProperties", requestFields);
+            var response = SendRequest("GetCurrentProgramScene");
+            return (string)response["currentProgramSceneName"];
         }
+
+        public void SetCurrentProgramScene(string sceneName)
+        {
+            var requestFields = new JObject
+            {
+                { "sceneName", sceneName }
+            };
+
+            SendRequest("SetCurrentProgramScene", requestFields);
+        }
+
+
+        //#TODO doc
+        public string GetCurrentPreviewScene()
+        {
+            var response = SendRequest("GetCurrentPreviewScene");
+            return (string)response["currentPreviewSceneName"];
+        }
+
+
+        public void SetCurrentPreviewScene(string sceneName)
+        {
+            var requestFields = new JObject
+            {
+                { "sceneName", sceneName }
+            };
+
+            SendRequest("SetCurrentPreviewScene", requestFields);
+        }
+
+        //#TODO CreateScene
+        //#TODO RemoveScene
+        //#TODO SetSceneName
+        //#TODO GetSceneSceneTransitionOverride
+        //#TODO SetSceneSceneTransitionOverride
+
+
+
+        #endregion Scene Requests
+
+        #region Scene Items Requests
+
+
+        //#TODO doc
+        public Int64 GetSceneItemId(string sceneName, string sourceName)
+        {
+
+            var requestFields = new JObject
+            {
+                { "sceneName", sceneName },
+                { "sourceName", sourceName }
+            };
+
+
+            // Can throw ErrorResponseException with code 600 if item not found
+            var response = SendRequest("GetSceneItemId", requestFields);
+            return (int)response["sceneItemId"];
+        }
+
+        //#TODO doc
+        public bool GetSceneItemEnabled(string sceneName, int sceneItemId)
+        {
+            //#TODO probably int, not uint64
+            var requestFields = new JObject
+            {
+                { "sceneName", sceneName },
+                { "sceneItemId", sceneItemId }
+            };
+
+            var response = SendRequest("GetSceneItemEnabled", requestFields);
+            return (bool)response["sceneItemEnabled"];
+        }
+
+        //#TODO doc
+        public void SetSceneItemEnabled(string sceneName, int sceneItemId, bool enabled)
+        {
+            //#TODO probably int, not uint64
+            var requestFields = new JObject
+            {
+                { "sceneName", sceneName },
+                { "sceneItemId", sceneItemId },
+                { "sceneItemEnabled", enabled }
+            };
+
+            SendRequest("SetSceneItemEnabled", requestFields);
+        }
+
+        #endregion Scene Items Requests
+
+
+
 
         /// <summary>
         /// 
@@ -2097,6 +2184,8 @@ namespace OBSWebsocketDotNet
             return (bool)response["sourceActive"];
         }
 
+        #region Outputs Requests
+
         /// <summary>
         /// Get the current status of the virtual camera
         /// </summary>
@@ -2131,5 +2220,37 @@ namespace OBSWebsocketDotNet
         {
             SendRequest("StartStopVirtualCam");
         }
+
+        public OutputStatus GetOutputStatus(string outputName)
+        {
+            var request = new JObject
+            {
+                { "outputName", outputName }
+            };
+
+
+            
+            JObject response = SendRequest("GetOutputStatus", request);
+            var outputStatus = new OutputStatus(response);
+            return outputStatus;
+        }
+
+
+
+        #endregion Outputs Requests
+
+        #region Stream Requests
+        public OutputStatus GetStreamStatus()
+        {
+            // Equivalent to GetOutputStatus on current output
+
+            JObject response = SendRequest("GetStreamStatus");
+            var outputStatus = new OutputStatus(response);
+            return outputStatus;
+        }
+
+
+
+        #endregion Stream Requests
     }
 }

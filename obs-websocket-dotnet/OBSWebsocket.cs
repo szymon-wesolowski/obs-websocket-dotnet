@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -681,9 +681,48 @@ namespace OBSWebsocketDotNet
                     ProfileListChanged?.Invoke(this, EventArgs.Empty);
                     break;
 
-                //case "StreamStarting":
-                //    StreamingStateChanged?.Invoke(this, OutputState.Starting);
-                //    break;
+                case "StreamStateChanged":
+
+                    OutputState state;
+                    switch ((string) body["outputState"])
+                    {
+                        case "OBS_WEBSOCKET_OUTPUT_UNKNOWN":
+                            state = OutputState.Unknown;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_STARTING":
+                            state = OutputState.Starting;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_STARTED":
+                            state = OutputState.Started;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_STOPPING":
+                            state = OutputState.Stopping;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_STOPPED":
+                            state = OutputState.Stopped;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_RECONNECTING":
+                            state = OutputState.Reconnecting;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_PAUSED":
+                            state = OutputState.Paused;
+                            break;
+                        case "OBS_WEBSOCKET_OUTPUT_RESUMED":
+                            state = OutputState.Resumed;
+                            break;
+                        default:
+                            state = OutputState.Unknown;
+                            break;
+                    }
+
+                    StreamingStateChanged?.Invoke(this, state);
+
+                    break;
+
+
+                case "StreamStarting":
+                    StreamingStateChanged?.Invoke(this, OutputState.Starting);
+                    break;
 
                 case "StreamStateChanged":
                     Enum.TryParse((string)body["outputState"], out OutputState outputState);

@@ -1,5 +1,7 @@
 ﻿namespace OBSWebsocketDotNet.Types
 {
+    // https://obsproject.com/docs/reference-sources.html#c.obs_source_get_type
+
     /// <summary>
     /// Type of scene item's source
     /// </summary>
@@ -8,21 +10,21 @@
         /// <summary>
         /// Input
         /// </summary>
-        Input,
+        OBS_SOURCE_TYPE_INPUT,
 
         /// <summary>
-        /// Group
+        /// Filter
         /// </summary>
-        Group,
+        OBS_SOURCE_TYPE_FILTER,
+
+        /// <summary>
+        /// Transition
+        /// </summary>
+        OBS_SOURCE_TYPE_TRANSITION,
 
         /// <summary>
         /// Scene
         /// </summary>
-        Scene,
-
-        /// <summary>
-        /// OBS_SOURCE_TYPE_INPUT
-        /// </summary>
-        OBS_SOURCE_TYPE_INPUT
+        OBS_SOURCE_TYPE_SCENE
     }
 }

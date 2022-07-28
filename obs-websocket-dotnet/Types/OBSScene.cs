@@ -45,5 +45,41 @@ namespace OBSWebsocketDotNet.Types
         /// Default Constructor for deserialization
         /// </summary>
         public OBSScene() { }
+
+        internal OBSWebsocket owningWebsocket;
+
+        public static OBSScene CurrentProgramScene(OBSWebsocket socket)
+        {
+            return new OBSScene() { owningWebsocket = socket, Name = socket.GetCurrentProgramScene() };
+        }
+
+        public static OBSScene CurrentPreviewScene(OBSWebsocket socket)
+        {
+            return new OBSScene() { owningWebsocket = socket, Name = socket.GetCurrentPreviewScene() };
+        }
+
+
+        public SceneItem GetSceneItemByName(string sourceName)
+        {
+            try
+            {
+                return new SceneItem()
+                {
+                    owningWebsocket = owningWebsocket, SceneName = Name,
+                    ID = (int) owningWebsocket.GetSceneItemId(Name, sourceName)
+                };
+            }
+            catch (ErrorResponseException ex)
+            {
+                if (ex.ErrorCode == 600) // not found
+                    return null;
+                return null; // other error
+            }
+
+
+            
+        }
+
+
     }
 }
