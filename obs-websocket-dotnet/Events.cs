@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using OBSWebsocketDotNet.Types;
+using System;
 using System.Collections.Generic;
 
 namespace OBSWebsocketDotNet
@@ -324,4 +325,15 @@ namespace OBSWebsocketDotNet
     /// <param name="sourceName">Name of source</param>
     /// <param name="sourceKind">Kind of source</param>
     public delegate void MediaPlayingCallback(OBSWebsocket sender, string sourceName, string sourceKind);
+
+    #region InputsEvents
+
+    /// <summary>
+    /// Callback by <see cref="OBSWebsocket.InputVolumeMeters"/>
+    /// </summary>
+    /// <param name="sender"><see cref="OBSWebsocket"/> instance</param>
+    /// <param name="inputs">Array of active inputs with their associated volume levels</param>
+    public delegate void InputVolumeMetersCallback(OBSWebsocket sender, List<InputVolumeMeter> inputs);
+
+    #endregion // InputsEvents
 }

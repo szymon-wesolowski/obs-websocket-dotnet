@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -299,7 +299,32 @@ namespace OBSWebsocketDotNet
         /// </summary>
         public event EventHandler VirtualCameraStopped;
 
-        #endregion
+        #region InputsEvents
+
+        private event InputVolumeMetersCallback _inputVolumeMeters;
+        public event InputVolumeMetersCallback InputVolumeMeters
+        {
+            // This event needs special subscription, handle that here
+            add
+            {
+                if (_inputVolumeMeters == null || _inputVolumeMeters.GetInvocationList().Length == 0)
+                {
+                    RegisterEvent(EventSubscription.InputVolumeMeters);
+                }
+                _inputVolumeMeters += value;
+            }
+            remove
+            {
+                _inputVolumeMeters -= value;
+                if (_inputVolumeMeters == null || _inputVolumeMeters.GetInvocationList().Length == 0)
+                {
+                    UnRegisterEvent(EventSubscription.InputVolumeMeters);
+                }
+            }
+        }
+        #endregion // InputsEvents
+
+        #endregion // Events
 
         /// <summary>
         /// WebSocket request timeout, represented as a TimeSpan object
@@ -548,7 +573,8 @@ namespace OBSWebsocketDotNet
         {
             var requestFields = new JObject
             {
-                { "rpcVersion", SUPPORTED_RPC_VERSION }
+                { "rpcVersion", SUPPORTED_RPC_VERSION },
+                { "eventSubscriptions", (uint)_registeredEvents }
             };
 
             if (authInfo != null)
@@ -815,6 +841,20 @@ namespace OBSWebsocketDotNet
                 case "VirtualCamStopped":
                     VirtualCameraStopped?.Invoke(this, EventArgs.Empty);
                     break;
+
+                #region InputEvents
+                case "InputVolumeMeters":
+                    if (_inputVolumeMeters != null)
+                    {
+                        List<InputVolumeMeter> inputs = new List<InputVolumeMeter>();
+                        JsonConvert.PopulateObject(body["inputs"].ToString(), inputs);
+
+                        _inputVolumeMeters?.Invoke(this, inputs);
+                    }
+                    break;
+                #endregion // InputEvents
+
+
                 default:
                         var message = $"Unsupported Event: {eventType}\n{body}";
                         Console.WriteLine(message);
@@ -874,6 +914,49 @@ namespace OBSWebsocketDotNet
             SendIdentify(connectionPassword, authInfo);
             
             connectionPassword = null;
+        }
+
+
+        private EventSubscription _registeredEvents = EventSubscription.All;
+
+        /// <summary>
+        /// Send a Reidentify with new event subscriptions
+        /// </summary>
+        /// <returns>true if we sent the reidentify, false if failed</returns>
+        protected bool SendReidentify()
+        {
+            if (WSConnection == null || !WSConnection.IsRunning) return false; // #TODO check if we are in Identified/Connected state, if we didn't send our Identify yet, we shouldn't send Reidentify now
+
+            var requestFields = new JObject
+            {
+                { "eventSubscriptions", (uint)_registeredEvents }
+            };
+
+            try
+            {
+                // Throws ErrorResponseException if auth fails
+                SendRequest(MessageTypes.ReIdentify, null, requestFields, false);
+            }
+            catch (ErrorResponseException)
+            {
+                Disconnected?.Invoke(this, new DisconnectionInfo(DisconnectionType.Error, WebSocketCloseStatus.ProtocolError, "Reidentify Failed", String.Empty, new AuthFailureException()));
+                Disconnect();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void RegisterEvent(EventSubscription newSubscription)
+        {
+            _registeredEvents |= newSubscription;
+            SendReidentify();
+        }
+
+        private void UnRegisterEvent(EventSubscription removeSubscription)
+        {
+            _registeredEvents &= ~removeSubscription;
+            SendReidentify();
         }
     }
 }
