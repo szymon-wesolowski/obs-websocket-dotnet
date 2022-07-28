@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -783,8 +783,8 @@ namespace OBSWebsocketDotNet
                     SourceRenamed?.Invoke(this, (string)body["newName"], (string)body["previousName"]);
                     break;
 
-                case "SourceMuteStateChanged":
-                    SourceMuteStateChanged?.Invoke(this, (string)body["sourceName"], (bool)body["muted"]);
+                case "InputMuteStateChanged":
+                    SourceMuteStateChanged?.Invoke(this, (string)body["inputName"], (bool)body["inputMuted"]);
                     break;
                 case "SourceAudioDeactivated":
                     SourceAudioDeactivated?.Invoke(this, (string)body["sourceName"]);

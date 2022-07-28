@@ -679,29 +679,29 @@ namespace OBSWebsocketDotNet
         /// </summary>
         /// <param name="sourceName">Name of the source which mute state will be changed</param>
         /// <param name="mute">Desired mute state</param>
-        public void SetMute(string sourceName, bool mute)
+        public void SetInputMute(string inputName, bool mute)
         {
             var requestFields = new JObject
             {
-                { "source", sourceName },
-                { "mute", mute }
+                { "inputName", inputName },
+                { "inputMuted", mute }
             };
 
-            SendRequest("SetMute", requestFields);
+            SendRequest("SetInputMute", requestFields);
         }
 
         /// <summary>
         /// Toggle the mute state of the specified source
         /// </summary>
         /// <param name="sourceName">Name of the source which mute state will be toggled</param>
-        public void ToggleMute(string sourceName)
+        public void ToggleInputMute(string inputName)
         {
             var requestFields = new JObject
             {
-                { "source", sourceName }
+                { "inputName", inputName }
             };
 
-            SendRequest("ToggleMute", requestFields);
+            SendRequest("ToggleInputMute", requestFields);
         }
 
         /// <summary>
