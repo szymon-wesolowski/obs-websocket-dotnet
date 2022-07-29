@@ -18,6 +18,11 @@
         /// <summary>
         /// Scene
         /// </summary>
-        Scene
+        Scene,
+
+        /// <summary>
+        /// OBS_SOURCE_TYPE_INPUT
+        /// </summary>
+        OBS_SOURCE_TYPE_INPUT
     }
 }

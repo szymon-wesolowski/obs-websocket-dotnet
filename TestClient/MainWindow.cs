@@ -65,41 +65,41 @@ namespace TestClient
                 tbPluginVersion.Text = versionInfo.PluginVersion;
                 tbOBSVersion.Text = versionInfo.OBSStudioVersion;
 
-                btnListScenes.PerformClick();
-                btnGetCurrentScene.PerformClick();
+                //btnListScenes.PerformClick();
+                //btnGetCurrentScene.PerformClick();
 
-                btnListSceneCol.PerformClick();
-                btnGetCurrentSceneCol.PerformClick();
+                //btnListSceneCol.PerformClick();
+                //btnGetCurrentSceneCol.PerformClick();
 
-                btnListProfiles.PerformClick();
-                btnGetCurrentProfile.PerformClick();
+                //btnListProfiles.PerformClick();
+                //btnGetCurrentProfile.PerformClick();
 
-                btnListTransitions.PerformClick();
-                btnGetCurrentTransition.PerformClick();
+                //btnListTransitions.PerformClick();
+                //btnGetCurrentTransition.PerformClick();
 
-                btnGetTransitionDuration.PerformClick();
-                tbFolderPath.Text = obs.GetRecordingFolder().ToString();
+                //btnGetTransitionDuration.PerformClick();
+                //tbFolderPath.Text = obs.GetRecordingFolder().ToString();
 
                 var streamStatus = obs.GetStreamingStatus();
                 if (streamStatus.IsStreaming)
-                    onStreamingStateChange(obs, OutputState.Started);
+                    onStreamingStateChange(obs, OutputState.OBS_WEBSOCKET_OUTPUT_STARTED);
                 else
-                    onStreamingStateChange(obs, OutputState.Stopped);
+                    onStreamingStateChange(obs, OutputState.OBS_WEBSOCKET_OUTPUT_STOPPED);
 
-                if (streamStatus.IsRecording)
-                    onRecordingStateChange(obs, OutputState.Started);
-                else
-                    onRecordingStateChange(obs, OutputState.Stopped);
+                //if (streamStatus.IsRecording)
+                //    onRecordingStateChange(obs, OutputState.Started);
+                //else
+                //    onRecordingStateChange(obs, OutputState.Stopped);
 
-                var camStatus = obs.GetVirtualCamStatus();
-                if (camStatus.IsActive)
-                {
-                    onVirtualCameraStarted(this, EventArgs.Empty);
-                }
-                else
-                {
-                    onVirtualCameraStopped(this, EventArgs.Empty);
-                }
+                //var camStatus = obs.GetVirtualCamStatus();
+                //if (camStatus.IsActive)
+                //{
+                //    onVirtualCameraStarted(this, EventArgs.Empty);
+                //}
+                //else
+                //{
+                //    onVirtualCameraStopped(this, EventArgs.Empty);
+                //}
             }));
         }
 
@@ -128,12 +128,13 @@ namespace TestClient
                 }
                 else
                 {
-                    MessageBox.Show($"Connection failed: Status: {e.CloseStatus} Desc: {e.CloseStatusDescription}\nType: {e.Type}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    //MessageBox.Show($"Connection failed: Status: {e.CloseStatus} Desc: {e.CloseStatusDescription}\nType: {e.Type}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
             }));
 
         }
+
         private void onSceneChange(OBSWebsocket sender, string newSceneName)
             {
                 BeginInvoke((MethodInvoker)delegate
@@ -179,11 +180,11 @@ namespace TestClient
                 string state = "";
                 switch (newState)
                 {
-                    case OutputState.Starting:
+                    case OutputState.OBS_WEBSOCKET_OUTPUT_STARTING:
                         state = "Stream starting...";
                         break;
 
-                    case OutputState.Started:
+                    case OutputState.OBS_WEBSOCKET_OUTPUT_STARTED:
                         state = "Stop streaming";
                         BeginInvoke((MethodInvoker)delegate
                         {
@@ -191,11 +192,11 @@ namespace TestClient
                         });
                         break;
 
-                    case OutputState.Stopping:
+                    case OutputState.OBS_WEBSOCKET_OUTPUT_STOPPING:
                         state = "Stream stopping...";
                         break;
 
-                    case OutputState.Stopped:
+                    case OutputState.OBS_WEBSOCKET_OUTPUT_STOPPED:
                         state = "Start streaming";
                         BeginInvoke((MethodInvoker)delegate
                         {
@@ -219,21 +220,21 @@ namespace TestClient
                 string state = "";
                 switch (newState)
                 {
-                    case OutputState.Starting:
-                        state = "Recording starting...";
-                        break;
+                    //case OutputState.Starting:
+                    //    state = "Recording starting...";
+                    //    break;
 
-                    case OutputState.Started:
-                        state = "Stop recording";
-                        break;
+                    //case OutputState.Started:
+                    //    state = "Stop recording";
+                    //    break;
 
-                    case OutputState.Stopping:
-                        state = "Recording stopping...";
-                        break;
+                    //case OutputState.Stopping:
+                    //    state = "Recording stopping...";
+                    //    break;
 
-                    case OutputState.Stopped:
-                        state = "Start recording";
-                        break;
+                    //case OutputState.Stopped:
+                    //    state = "Start recording";
+                    //    break;
 
                     default:
                         state = "State unknown";
@@ -294,6 +295,7 @@ namespace TestClient
                 foreach (var scene in scenes)
                 {
                     var node = new TreeNode(scene.Name);
+                    if (scene.Items == null) continue;
                     foreach (var item in scene.Items)
                     {
                         node.Nodes.Add(item.SourceName);
@@ -305,7 +307,7 @@ namespace TestClient
 
             private void btnGetCurrentScene_Click(object sender, EventArgs e)
             {
-                tbCurrentScene.Text = obs.GetCurrentScene().Name;
+              obs.GetStreamingStatus();
             }
 
             private void btnSetCurrentScene_Click(object sender, EventArgs e)
@@ -479,5 +481,6 @@ namespace TestClient
             {
                 obs.ToggleVirtualCam();
             }
-        }
+
+  }
     }

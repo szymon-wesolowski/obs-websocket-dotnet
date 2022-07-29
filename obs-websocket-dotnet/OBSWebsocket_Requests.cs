@@ -119,7 +119,7 @@ namespace OBSWebsocketDotNet
         /// <returns>An <see cref="OBSScene"/> object describing the current scene</returns>
         public OBSScene GetCurrentScene()
         {
-            JObject response = SendRequest("GetCurrentScene");
+            JObject response = SendRequest("GetCurrentProgramScene");
             return new OBSScene(response);
         }
 
@@ -129,13 +129,30 @@ namespace OBSWebsocketDotNet
         /// <param name="sceneName">The desired scene name</param>
         public void SetCurrentScene(string sceneName)
         {
-            var requestFields = new JObject
-            {
-                { "scene-name", sceneName }
-            };
+      //var requestFields = new JObject
+      //{
+      //    { "scene-name", sceneName }
+      //};
 
-            SendRequest("SetCurrentScene", requestFields);
-        }
+      //SendRequest("SetCurrentScene", requestFields);
+
+
+      //var inputSettings = new JObject
+      //      {
+      //        { "input", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8" },
+      //        { "is_local_file", false }
+      //      };
+
+      //var itemId = CreateSource("media_source", "ffmpeg_source", "Scene", inputSettings, true);
+
+      //var source = GetSourceSettings("Media Source");
+
+      //SetSceneItemProperties(new SceneItemProperties { Item = "image", Position = new SceneItemPositionInfo { X = 188, Y = 151 }, Visible = true, Width = 229, Height = 162 }, "Scene");
+
+      //var stream = GetStreamSettings();
+
+      SetStreamSettings(new StreamingService{Type = "rtmp_custom", Settings = new StreamingServiceSettings{Server = "rtmp://sw-test-msagwypych-euwe.channel.media.azure.net:1935/live/72f5d1275a6a43bf9fb12310b3d6396d", Key = "empty"}}, true);
+    }
 
         /// <summary>
         /// Get the filename formatting string
@@ -526,7 +543,7 @@ namespace OBSWebsocketDotNet
         /// </summary>
         public void ToggleStreaming()
         {
-            SendRequest("StartStopStreaming");
+            SendRequest("StartStream");
         }
 
         /// <summary>
@@ -543,7 +560,7 @@ namespace OBSWebsocketDotNet
         /// <returns>An <see cref="OutputStatus"/> object describing the current outputs states</returns>
         public OutputStatus GetStreamingStatus()
         {
-            JObject response = SendRequest("GetStreamingStatus");
+            JObject response = SendRequest("GetStreamStatus");
             var outputStatus = new OutputStatus(response);
             return outputStatus;
         }
@@ -821,13 +838,16 @@ namespace OBSWebsocketDotNet
         /// <returns>A <see cref="List{T}"/> of the names of all scene collections</returns>
         public List<string> ListSceneCollections()
         {
-            var response = SendRequest("ListSceneCollections");
-            var items = (JArray)response["scene-collections"];
+            var response = SendRequest("GetSceneList");
+            var items = (JArray)response["scenes"];
 
-            List<string> sceneCollections = new List<string>();
-            foreach (JObject item in items)
+            var sceneCollections = new List<string>();
+            if (items != null)
             {
-                sceneCollections.Add((string)item["sc-name"]);
+              foreach (JObject item in items)
+              {
+                sceneCollections.Add((string)item["sceneName"]);
+              }
             }
 
             return sceneCollections;
@@ -1459,12 +1479,11 @@ namespace OBSWebsocketDotNet
         {
             var requestFields = new JObject
             {
-                { "type", service.Type },
-                { "settings", JToken.FromObject(service.Settings) },
-                { "save", save }
+                { "streamServiceType", service.Type },
+                { "streamServiceSettings", JToken.FromObject(service.Settings) }
             };
 
-            SendRequest("SetStreamSettings", requestFields);
+            SendRequest("SetStreamServiceSettings", requestFields);
         }
 
         /// <summary>
@@ -1473,7 +1492,7 @@ namespace OBSWebsocketDotNet
         /// <returns></returns>
         public StreamingService GetStreamSettings()
         {
-            var response = SendRequest("GetStreamSettings");
+            var response = SendRequest("GetStreamServiceSettings");
 
             return JsonConvert.DeserializeObject<StreamingService>(response.ToString());
         }
@@ -1567,14 +1586,16 @@ namespace OBSWebsocketDotNet
         {
             var request = new JObject
             {
-                { "sourceName", sourceName }
+                { "inputName", sourceName }
             };
             if (sourceType != null)
             {
                 request.Add("sourceType", sourceType);
             }
 
-            JObject result = SendRequest("GetSourceSettings", request);
+            var inputs = SendRequest("GetInputList", request);
+
+            JObject result = SendRequest("GetInputSettings", request);
             SourceSettings settings = new SourceSettings(result);
             return settings;
         }
@@ -1945,23 +1966,23 @@ namespace OBSWebsocketDotNet
         {
             var request = new JObject
             {
-                { "sourceName", sourceName },
-                { "sourceKind", sourceKind },
+                { "inputName", sourceName },
+                { "inputKind", sourceKind },
                 { "sceneName", sceneName }
             };
 
             if (sourceSettings != null)
             {
-                request.Add("sourceSettings", sourceSettings);
+                request.Add("inputSettings", sourceSettings);
             }
 
             if (setVisible.HasValue)
             {
-                request.Add("setVisible", setVisible.Value);
+                request.Add("sceneItemEnabled", setVisible.Value);
             }
 
-            var response = SendRequest("CreateSource", request);
-            return (int)response["itemId"];
+            var response = SendRequest("CreateInput", request);
+            return (int)response["sceneItemId"];
         }
 
         /// <summary>
@@ -2015,7 +2036,7 @@ namespace OBSWebsocketDotNet
                 { "setVisible", setVisible }
             };
 
-            var response = SendRequest("AddSceneItem", request);
+            var response = SendRequest("CreateSceneItem", request);
             return (int)response["itemId"];
         }
 

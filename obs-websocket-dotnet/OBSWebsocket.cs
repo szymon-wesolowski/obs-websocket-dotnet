@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net.WebSockets;
+//using System.Net.WebSockets;
 using Websocket.Client;
 using System.Security;
 using OBSWebsocketDotNet.Communication;
@@ -394,7 +395,7 @@ namespace OBSWebsocketDotNet
                 // Attempt to both close and dispose the existing connection
                 try
                 {
-                    WSConnection.Stop(WebSocketCloseStatus.Empty, string.Empty);
+                    var success = WSConnection.Stop(WebSocketCloseStatus.NormalClosure, string.Empty);
                     ((IDisposable)WSConnection).Dispose();
                 }
                 catch { }
@@ -452,8 +453,8 @@ namespace OBSWebsocketDotNet
                     break;
                 case MessageTypes.Event:
                     // Handle events
-                    string eventType = body["update-type"].ToString();
-                    Task.Run(() => { ProcessEventType(eventType, body); });
+                    string eventType = body["eventType"].ToString();
+                    Task.Run(() => { ProcessEventType(eventType, (JObject)body["eventData"]); });
                     break;
                 default:
                     // Unsupported message type
@@ -516,7 +517,7 @@ namespace OBSWebsocketDotNet
             if ((string)result["status"] == "error")
                 throw new ErrorResponseException((string)result["error"]);
 
-            return result["responseData"].ToObject<JObject>();
+            return result["responseData"]?.ToObject<JObject>();
         }
 
         /// <summary>
@@ -645,37 +646,38 @@ namespace OBSWebsocketDotNet
                     ProfileListChanged?.Invoke(this, EventArgs.Empty);
                     break;
 
-                case "StreamStarting":
-                    StreamingStateChanged?.Invoke(this, OutputState.Starting);
+                //case "StreamStarting":
+                //    StreamingStateChanged?.Invoke(this, OutputState.Starting);
+                //    break;
+
+                case "StreamStateChanged":
+                    Enum.TryParse((string)body["outputState"], out OutputState outputState);
+                    StreamingStateChanged?.Invoke(this, outputState);
                     break;
 
-                case "StreamStarted":
-                    StreamingStateChanged?.Invoke(this, OutputState.Started);
-                    break;
+                //case "StreamStopping":
+                //    StreamingStateChanged?.Invoke(this, OutputState.Stopping);
+                //    break;
 
-                case "StreamStopping":
-                    StreamingStateChanged?.Invoke(this, OutputState.Stopping);
-                    break;
+                //case "StreamStopped":
+                //    StreamingStateChanged?.Invoke(this, OutputState.Stopped);
+                //    break;
 
-                case "StreamStopped":
-                    StreamingStateChanged?.Invoke(this, OutputState.Stopped);
-                    break;
+                //case "RecordingStarting":
+                //    RecordingStateChanged?.Invoke(this, OutputState.Starting);
+                //    break;
 
-                case "RecordingStarting":
-                    RecordingStateChanged?.Invoke(this, OutputState.Starting);
-                    break;
+                //case "RecordingStarted":
+                //    RecordingStateChanged?.Invoke(this, OutputState.Started);
+                //    break;
 
-                case "RecordingStarted":
-                    RecordingStateChanged?.Invoke(this, OutputState.Started);
-                    break;
+                //case "RecordingStopping":
+                //    RecordingStateChanged?.Invoke(this, OutputState.Stopping);
+                //    break;
 
-                case "RecordingStopping":
-                    RecordingStateChanged?.Invoke(this, OutputState.Stopping);
-                    break;
-
-                case "RecordingStopped":
-                    RecordingStateChanged?.Invoke(this, OutputState.Stopped);
-                    break;
+                //case "RecordingStopped":
+                //    RecordingStateChanged?.Invoke(this, OutputState.Stopped);
+                //    break;
                 case "RecordingPaused":
                     RecordingPaused?.Invoke(this, EventArgs.Empty);
                     break;
@@ -698,21 +700,21 @@ namespace OBSWebsocketDotNet
                     StudioModeSwitched?.Invoke(this, (bool)body["new-state"]);
                     break;
 
-                case "ReplayStarting":
-                    ReplayBufferStateChanged?.Invoke(this, OutputState.Starting);
-                    break;
+                //case "ReplayStarting":
+                //    ReplayBufferStateChanged?.Invoke(this, OutputState.Starting);
+                //    break;
 
-                case "ReplayStarted":
-                    ReplayBufferStateChanged?.Invoke(this, OutputState.Started);
-                    break;
+                //case "ReplayStarted":
+                //    ReplayBufferStateChanged?.Invoke(this, OutputState.Started);
+                //    break;
 
-                case "ReplayStopping":
-                    ReplayBufferStateChanged?.Invoke(this, OutputState.Stopping);
-                    break;
+                //case "ReplayStopping":
+                //    ReplayBufferStateChanged?.Invoke(this, OutputState.Stopping);
+                //    break;
 
-                case "ReplayStopped":
-                    ReplayBufferStateChanged?.Invoke(this, OutputState.Stopped);
-                    break;
+                //case "ReplayStopped":
+                //    ReplayBufferStateChanged?.Invoke(this, OutputState.Stopped);
+                //    break;
 
                 case "Exiting":
                     OBSExit?.Invoke(this, EventArgs.Empty);
@@ -736,7 +738,7 @@ namespace OBSWebsocketDotNet
                 case "SourceAudioSyncOffsetChanged":
                     SourceAudioSyncOffsetChanged?.Invoke(this, (string)body["sourceName"], (int)body["syncOffset"]);
                     break;
-                case "SourceCreated":
+                case "InputCreated":
                     SourceCreated?.Invoke(this, new SourceSettings(body));
                     break;
                 case "SourceDestroyed":

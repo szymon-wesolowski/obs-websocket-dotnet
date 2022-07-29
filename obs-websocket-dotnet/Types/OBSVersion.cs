@@ -11,26 +11,26 @@ namespace OBSWebsocketDotNet.Types
         /// <summary>
         /// obs-websocket plugin version
         /// </summary>
-        [JsonProperty(PropertyName = "obs-websocket-version")]
+        [JsonProperty(PropertyName = "obsWebSocketVersion")]
         public string PluginVersion { get; internal set; }
 
         /// <summary>
         /// OBS Studio version
         /// </summary>
-        [JsonProperty(PropertyName = "obs-studio-version")]
+        [JsonProperty(PropertyName = "obsVersion")]
         public string OBSStudioVersion { get; internal set; }
 
         /// <summary>
         /// OBSRemote compatible API version.Fixed to 1.1 for retrocompatibility.
         /// </summary>
-        [JsonProperty(PropertyName = "version")]
+        [JsonProperty(PropertyName = "rpcVersion")]
         public double Version { internal set; get; }
 
         /// <summary>
         /// List of available request types, formatted as a comma-separated list string (e.g. : "Method1,Method2,Method3").
         /// </summary>
-        [JsonProperty(PropertyName = "available-requests")]
-        public string AvailableRequests { get; internal set; }
+        [JsonProperty(PropertyName = "availableRequests")]
+        public string[] AvailableRequests { get; internal set; }
 
         /// <summary>
         /// Builds the object from the JSON response body
