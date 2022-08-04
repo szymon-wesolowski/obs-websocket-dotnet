@@ -126,15 +126,32 @@ namespace OBSWebsocketDotNet
         /// Set the current scene to the specified one
         /// </summary>
         /// <param name="sceneName">The desired scene name</param>
-        //public void SetCurrentScene(string sceneName)
-        //{
-        //    var requestFields = new JObject
-        //    {
-        //        { "scene-name", sceneName }
-        //    };
-        //
-        //    SendRequest("SetCurrentScene", requestFields);
-        //}
+        public void SetCurrentScene(string sceneName)
+        {
+          //var requestFields = new JObject
+          //{
+          //    { "scene-name", sceneName }
+          //};
+
+          //SendRequest("SetCurrentScene", requestFields);
+
+
+          //var inputSettings = new JObject
+          //      {
+          //        { "input", "https://multiplatform-f.akamaihd.net/i/multi/will/bunny/big_buck_bunny_,640x360_400,640x360_700,640x360_1000,950x540_1500,.f4v.csmil/master.m3u8" },
+          //        { "is_local_file", false }
+          //      };
+
+          //var itemId = CreateSource("media_source", "ffmpeg_source", "Scene", inputSettings, true);
+
+          //var source = GetSourceSettings("Media Source");
+
+          //SetSceneItemProperties(new SceneItemProperties { Item = "image", Position = new SceneItemPositionInfo { X = 188, Y = 151 }, Visible = true, Width = 229, Height = 162 }, "Scene");
+
+          //var stream = GetStreamSettings();
+
+          SetStreamSettings(new StreamingService{Type = "rtmp_custom", Settings = new StreamingServiceSettings{Server = "rtmp://sw-test-msagwypych-euwe.channel.media.azure.net:1935/live/72f5d1275a6a43bf9fb12310b3d6396d", Key = "empty"}}, true);
+        }
 
         /// <summary>
         /// Get the filename formatting string
@@ -1671,16 +1688,14 @@ namespace OBSWebsocketDotNet
         /// <returns>settings</returns>
         public SourceSettings GetSourceSettings(string sourceName)
         {
-            var request = new JObject
-            {
-                { "inputName", sourceName }
-            };
+          var request = new JObject
+          {
+            { "inputName", sourceName }
+          };
 
-            var inputs = SendRequest("GetInputList", request);
-
-            JObject result = SendRequest("GetInputSettings", request);
-            SourceSettings settings = new SourceSettings(result);
-            return settings;
+          JObject result = SendRequest("GetInputSettings", request);
+          SourceSettings settings = new SourceSettings(sourceName, result);
+          return settings;
         }
 
         /// <summary>

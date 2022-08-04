@@ -80,11 +80,11 @@ namespace TestClient
                 //btnGetTransitionDuration.PerformClick();
                 //tbFolderPath.Text = obs.GetRecordingFolder().ToString();
 
-                var streamStatus = obs.GetStreamingStatus();
-                if (streamStatus.IsStreaming)
-                    onStreamingStateChange(obs, OutputState.OBS_WEBSOCKET_OUTPUT_STARTED);
+                var streamStatus = obs.GetStreamStatus();
+                if (streamStatus.IsActive)
+                    onStreamingStateChange(obs, OutputState.Started);
                 else
-                    onStreamingStateChange(obs, OutputState.OBS_WEBSOCKET_OUTPUT_STOPPED);
+                    onStreamingStateChange(obs, OutputState.Stopped);
 
                 //if (streamStatus.IsRecording)
                 //    onRecordingStateChange(obs, OutputState.Started);
@@ -180,11 +180,11 @@ namespace TestClient
                 string state = "";
                 switch (newState)
                 {
-                    case OutputState.OBS_WEBSOCKET_OUTPUT_STARTING:
+                    case OutputState.Starting:
                         state = "Stream starting...";
                         break;
 
-                    case OutputState.OBS_WEBSOCKET_OUTPUT_STARTED:
+                    case OutputState.Started:
                         state = "Stop streaming";
                         BeginInvoke((MethodInvoker)delegate
                         {
@@ -192,11 +192,11 @@ namespace TestClient
                         });
                         break;
 
-                    case OutputState.OBS_WEBSOCKET_OUTPUT_STOPPING:
+                    case OutputState.Stopping:
                         state = "Stream stopping...";
                         break;
 
-                    case OutputState.OBS_WEBSOCKET_OUTPUT_STOPPED:
+                    case OutputState.Stopped:
                         state = "Start streaming";
                         BeginInvoke((MethodInvoker)delegate
                         {
@@ -307,7 +307,7 @@ namespace TestClient
 
             private void btnGetCurrentScene_Click(object sender, EventArgs e)
             {
-              obs.GetStreamingStatus();
+              obs.GetStreamStatus();
             }
 
             private void btnSetCurrentScene_Click(object sender, EventArgs e)
